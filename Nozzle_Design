@@ -1,0 +1,62 @@
+%% Nozzle Design and Data Preparation for SolidWorks
+% Design Parameters
+% The nozzle design is based on the following parameters:
+%   - Throat Radius: The radius at the narrowest part of the nozzle (throat) is 0.05 meters.
+%   - Exit Radius: The radius at the exit of the nozzle is 0.1 meters.
+%   - Length: The total length of the nozzle is 0.5 meters.
+
+% Parameters for the nozzle design
+throat_radius = 0.05; % Throat radius in meters
+exit_radius = 0.1; % Exit radius in meters
+length = 0.5; % Total length of the nozzle in meters
+
+% Number of points for the nozzle contour
+n_points = 100;
+
+%% Coordinate Arrays
+% Initialize arrays for coordinates
+x = linspace(0, length, n_points); % X-coordinates
+r = zeros(size(x)); % Radius at each x-coordinate
+
+%% Sections Definition
+% Define the sections of the nozzle
+converging_length = length / 3;
+throat_length = length / 3;
+diverging_length = length / 3;
+
+%% Radius Calculation
+% Calculate the radii for each section
+for i = 1:n_points
+    if x(i) <= converging_length
+        % Converging section (linear taper)
+        r(i) = exit_radius - (exit_radius - throat_radius) * (x(i) / converging_length);
+    elseif x(i) <= converging_length + throat_length
+        % Throat section (constant radius)
+        r(i) = throat_radius;
+    else
+        % Diverging section (linear taper)
+        r(i) = throat_radius + (exit_radius - throat_radius) * ((x(i) - converging_length - throat_length) / diverging_length);
+    end
+end
+
+%% Data Export
+% Combine x, y (radius), and z (zeros) into a matrix for export
+nozzle_contour = [x', r', zeros(n_points, 1)];
+
+% Save the contour to a .txt file
+filename = 'nozzle_contour.txt';
+dlmwrite(filename, nozzle_contour, 'delimiter', '\t', 'precision', 6);
+
+disp(['Nozzle contour saved to ', filename]);
+
+%% Plot Nozzle Contour
+% Plotting the nozzle contour for visualization
+figure;
+plot(x, r, 'b', 'LineWidth', 1.5);
+title('Nozzle Contour');
+xlabel('Length (m)');
+ylabel('Radius (m)');
+grid on;
+
+% License line
+disp('Code by Mohamed Ezzelrgal.');
